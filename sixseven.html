@@ -68,14 +68,14 @@ nav{
 }
 
 .hero{
-    padding:80px 0;
+    padding:60px 0 80px 0;
 }
 
 .hero-content{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:60px;
-    align-items:center;
+    align-items:top;
 }
 
 .hero-copy h1{
@@ -84,12 +84,15 @@ nav{
     line-height:1.1;
     margin:0 0 24px;
     font-weight:500;
+    padding:160px 0 80px 0;
 }
 
-.hero-copy p{
-    font-size:1.25rem;
+.hero-copy div{
+    font-size:2.25rem;
     color:var(--secondary);
-    max-width:500px;
+		position: relative;
+		top: -80px;
+    max-width:400px;
 }
 
 .download{
@@ -232,16 +235,13 @@ footer{
     <div class="container">
 
         <div class="hero-content">
-
             <div class="hero-copy">
-
                 <h1>
-                    Words are at sixes and sevens
+                    Words are at<br/>sixes and sevens
                 </h1>
-
-                <p style="font-size:24pt">
+                <div class="hero-sub">
 									  Sort them out!
-                </p>
+                </div>
 <!--
                 <a class="download" href="#">
                     Download on the App Store
