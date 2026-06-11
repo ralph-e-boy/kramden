@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sixes & Sevens - A Spelling Word Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Space+Mono:wght@400;700&family=Outfit:wght@200;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+    --bg:#fafafa;
+    --card:#ffffff;
+    --text:#1d1d1f;
+    --secondary:#6e6e73;
+    --accent:#007aff;
+    --border:#e5e5e7;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:"Outfit",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+    font-weight:400;
+}
+
+.container{
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 24px;
+}
+
+header{
+    padding:20px 0;
+    border-bottom:1px solid var(--border);
+    background:white;
+}
+
+nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-family:"Space Mono",monospace;
+    font-weight:700;
+    letter-spacing:.08em;
+    font-size:0.9rem;
+    text-transform:uppercase;
+}
+
+.nav-links{
+    display:flex;
+    gap:24px;
+}
+
+.nav-links a{
+    color:var(--secondary);
+    text-decoration:none;
+}
+
+.hero{
+    padding:80px 0;
+}
+
+.hero-content{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+    align-items:center;
+}
+
+.hero-copy h1{
+    font-family:"Outfit",sans-serif;
+    font-size:clamp(32px,7vw,56px);
+    line-height:1.1;
+    margin:0 0 24px;
+    font-weight:500;
+}
+
+.hero-copy p{
+    font-size:1.25rem;
+    color:var(--secondary);
+    max-width:500px;
+}
+
+.download{
+    display:inline-block;
+    margin-top:30px;
+    padding:14px 24px;
+    background:var(--accent);
+    color:white;
+    text-decoration:none;
+    border-radius:999px;
+    font-weight:600;
+}
+
+.phone{
+    aspect-ratio:9/19;
+    border-radius:48px;
+    border:10px solid #111;
+    background:#eaeaea;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#999;
+    font-weight:600;
+    overflow:hidden;
+}
+
+.features{
+    padding:100px 0;
+}
+
+.features-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:24px;
+}
+
+.feature{
+    background:var(--card);
+    padding:28px;
+    border-radius:20px;
+    border:1px solid var(--border);
+}
+
+h2, h3{
+    font-family:"Outfit",sans-serif;
+    font-weight:500;
+}
+
+h3{
+    font-size:1.25rem;
+    letter-spacing:-0.01em;
+}
+
+.feature h3{
+    margin-top:0;
+}
+
+.showcase{
+    padding:100px 0;
+    text-align:center;
+}
+
+.screenshot-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:24px;
+    margin-top:40px;
+}
+
+.screenshot{
+    aspect-ratio:9/19;
+    border-radius:28px;
+    background:#ececec;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#999;
+}
+
+.cta{
+    padding:120px 0;
+    text-align:center;
+}
+
+.cta p{
+    font-size:1.1rem;
+    color:var(--secondary);
+    font-weight:300;
+}
+
+.cta h2{
+    font-family:"Outfit",sans-serif;
+    font-size:clamp(36px,5vw,60px);
+    margin-bottom:20px;
+    font-weight:500;
+}
+
+footer{
+    padding:40px 0;
+    text-align:center;
+    color:var(--secondary);
+    border-top:1px solid var(--border);
+}
+
+@media (max-width:768px){
+
+    .hero-content{
+        grid-template-columns:1fr;
+    }
+
+    .phone{
+        max-width:320px;
+        margin:auto;
+    }
+
+    .nav-links{
+        display:none;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <nav>
+            <div class="logo">SIXES & SEVENS</div>
+
+            <div class="nav-links">
+                <a href="#features">Features</a>
+               <!--<a href="#screenshots">Screenshots</a> -->
+                <a href="privacy.html">Privacy</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+
+        <div class="hero-content">
+
+            <div class="hero-copy">
+
+                <h1>
+                    Words are at sixes and sevens
+                </h1>
+
+                <p style="font-size:24pt">
+									  Sort them out!
+                </p>
+<!--
+                <a class="download" href="#">
+                    Download on the App Store
+                </a>
+-->
+            </div>
+            <div class="phone">
+							<img width="480" src="67.png">
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section class="features" id="features">
+    <div class="container">
+
+        <div class="features-grid">
+
+            <div class="feature">
+                <h3>Play more than once a day</h3>
+                <p>
+                    A fresh puzzle any time you want
+                </p>
+            </div>
+
+            <div class="feature">
+                <h3>Use either hand</h3>
+                <p>
+                    Configure the buttons for left or right handedness
+                </p>
+            </div>
+
+            <div class="feature">
+                <h3>Build Bigger Words</h3>
+                <p>
+                    Find as many words as possible from seven letters.
+                </p>
+            </div>
+
+            <div class="feature">
+                <h3>Use all seven letters</h3>
+                <p>
+                    Every game contains at least one word that uses all seven letters
+                </p>
+            </div>
+
+            <div class="feature">
+                <h3>Quick to Learn</h3>
+                <p>
+                    Pick up and play in seconds.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<section class="showcase" id="screenshots">
+
+    <div class="container">
+
+        <h2>Screenshots</h2>
+
+        <div class="screenshot-grid">
+
+            <div class="screenshot">Screenshot 1</div>
+            <div class="screenshot">Screenshot 2</div>
+            <div class="screenshot">Screenshot 3</div>
+            <div class="screenshot">Screenshot 4</div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2>
+            How many words can you find?
+        </h2>
+        <p>
+            One puzzle. Seven letters. Hundreds of possibilities.
+        </p>
+        <a class="download" href="#">
+            Download Now
+        </a>
+    </div>
+</section>
+<footer>
+    <div class="container">
+        © 2026 Kramden Apps
+    </div>
+</footer>
+</body>
+</html>
+```
+
