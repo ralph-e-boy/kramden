@@ -242,10 +242,19 @@ body::before {
     <nav class="nav">
         <a href="sixseven.html">Apps</a>
         <a href="#">Projects</a>
-        <a href="#">Contact</a>
+        <a href="#" data-k="q">Contact</a>
     </nav>
 
 </div>
+
+<script>
+const _0x4a2c = '636f6262 6c652d69 6d6d7572 65642d36 39406963 6c6f7564 2e636f6d';
+document.querySelector('[data-k="q"]').addEventListener('click', (e) => {
+  e.preventDefault();
+  const _0x8f1d = _0x4a2c.replace(/\s/g, '').match(/.{1,2}/g).map(x => String.fromCharCode(parseInt(x, 16))).join('');
+  window.location.href = `mailto:${_0x8f1d}`;
+});
+</script>
 
 </body>
 </html>
