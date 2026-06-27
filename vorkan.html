@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VORKAN - Vector Storm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+
+:root{
+    --bg:#02060a;
+    --panel:#04100c;
+    --text:#9dffb0;
+    --dim:#3f8a59;
+    --phosphor:#39ff14;
+    --cyan:#2de2e6;
+    --blue:#4a7bff;
+    --amber:#ffb000;
+    --magenta:#ff2d8e;
+    --border:rgba(57,255,20,.22);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+}
+
+body{
+    font-family:"VT323",monospace;
+    font-size:22px;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.45;
+    letter-spacing:.02em;
+    overflow-x:hidden;
+}
+
+/* CRT phosphor glow + vignette */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9998;
+    background:
+        radial-gradient(ellipse at 50% 35%, rgba(20,90,40,.18), transparent 55%),
+        radial-gradient(circle, transparent 50%, rgba(0,0,0,.85) 100%);
+}
+
+/* CRT scanlines */
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9999;
+    background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0) 0 2px,
+        rgba(0,0,0,.28) 2px 3px
+    );
+    animation:flicker 4s infinite steps(60);
+}
+
+@keyframes flicker{
+    0%,100%{opacity:.9;}
+    50%{opacity:.78;}
+}
+
+.container{
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 24px;
+}
+
+a{
+    color:var(--cyan);
+    text-decoration:none;
+}
+
+/* ---- header ---- */
+
+header{
+    padding:18px 0;
+    border-bottom:1px solid var(--border);
+    background:rgba(2,12,8,.6);
+}
+
+nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-family:"Press Start 2P",monospace;
+    font-size:.85rem;
+    letter-spacing:.1em;
+    color:var(--cyan);
+    text-shadow:0 0 10px rgba(45,226,230,.7);
+}
+
+.nav-links{
+    display:flex;
+    gap:28px;
+    font-size:1.15rem;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+}
+
+.nav-links a{
+    color:var(--dim);
+    transition:color .2s,text-shadow .2s;
+}
+
+.nav-links a:hover{
+    color:var(--phosphor);
+    text-shadow:0 0 8px rgba(57,255,20,.7);
+}
+
+/* ---- hero ---- */
+
+.hero{
+    padding:70px 0 90px;
+}
+
+.hero-content{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:56px;
+    align-items:center;
+}
+
+.scoreline{
+    font-family:"Press Start 2P",monospace;
+    font-size:.7rem;
+    color:var(--phosphor);
+    letter-spacing:.12em;
+    text-shadow:0 0 8px rgba(57,255,20,.6);
+    margin-bottom:28px;
+}
+
+.scoreline .hi{color:var(--cyan);text-shadow:0 0 8px rgba(45,226,230,.6);}
+
+.logo-big{
+    font-family:"Press Start 2P",monospace;
+    font-size:clamp(38px,10vw,92px);
+    line-height:1.05;
+    margin:0;
+    background:
+        repeating-linear-gradient(0deg,
+            transparent 0 3px,
+            rgba(0,0,0,.55) 3px 5px),
+        linear-gradient(90deg,#2f6bff 0%,#2de2e6 50%,#7cff5e 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 0 16px rgba(45,226,230,.45));
+}
+
+.subtitle{
+    font-family:"Press Start 2P",monospace;
+    font-size:clamp(11px,2.4vw,18px);
+    letter-spacing:.34em;
+    color:var(--phosphor);
+    text-shadow:0 0 10px rgba(57,255,20,.55);
+    margin:18px 0 0;
+}
+
+.tagline{
+    font-size:1.5rem;
+    color:var(--text);
+    max-width:420px;
+    margin:26px 0 0;
+}
+
+.download{
+    display:inline-block;
+    margin-top:34px;
+    padding:14px 30px;
+    font-family:"Press Start 2P",monospace;
+    font-size:.78rem;
+    letter-spacing:.08em;
+    color:var(--amber);
+    border:2px solid var(--amber);
+    background:transparent;
+    text-transform:uppercase;
+    box-shadow:0 0 14px rgba(255,176,0,.25),inset 0 0 14px rgba(255,176,0,.08);
+    transition:background .2s,color .2s,box-shadow .2s;
+}
+
+.download:hover{
+    color:#1a1000;
+    background:var(--amber);
+    box-shadow:0 0 26px rgba(255,176,0,.6);
+}
+
+.download::before{content:"> ";}
+.download::after{content:" <";}
+
+/* ---- phone ---- */
+
+.phone{
+    aspect-ratio:9/19;
+    max-width:330px;
+    margin:0 auto;
+    border-radius:42px;
+    border:3px solid rgba(45,226,230,.35);
+    background:#000;
+    overflow:hidden;
+    box-shadow:0 0 40px rgba(45,226,230,.18),inset 0 0 30px rgba(0,0,0,.8);
+}
+
+.phone img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+/* ---- features ---- */
+
+.section-title{
+    font-family:"Press Start 2P",monospace;
+    font-size:1rem;
+    letter-spacing:.12em;
+    color:var(--cyan);
+    text-shadow:0 0 10px rgba(45,226,230,.5);
+    text-align:center;
+    margin:0 0 48px;
+}
+
+.features{
+    padding:90px 0;
+    border-top:1px solid var(--border);
+}
+
+.features-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.feature{
+    background:linear-gradient(180deg,rgba(57,255,20,.04),transparent);
+    padding:26px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    transition:border-color .2s,box-shadow .2s;
+}
+
+.feature:hover{
+    border-color:rgba(45,226,230,.5);
+    box-shadow:0 0 22px rgba(45,226,230,.12);
+}
+
+.feature h3{
+    font-family:"Press Start 2P",monospace;
+    font-size:.72rem;
+    line-height:1.6;
+    color:var(--phosphor);
+    text-shadow:0 0 8px rgba(57,255,20,.4);
+    margin:0 0 14px;
+}
+
+.feature p{
+    margin:0;
+    font-size:1.25rem;
+    color:var(--text);
+}
+
+/* ---- showcase ---- */
+
+.showcase{
+    padding:90px 0;
+    text-align:center;
+    border-top:1px solid var(--border);
+}
+
+.showcase .phone{
+    margin-top:8px;
+}
+
+/* ---- cta ---- */
+
+.cta{
+    padding:110px 0;
+    text-align:center;
+    border-top:1px solid var(--border);
+}
+
+.cta h2{
+    font-family:"Press Start 2P",monospace;
+    font-size:clamp(18px,3.4vw,30px);
+    line-height:1.5;
+    color:var(--cyan);
+    text-shadow:0 0 16px rgba(45,226,230,.5);
+    margin:0 0 22px;
+}
+
+.cta p{
+    font-size:1.45rem;
+    color:var(--dim);
+    margin:0;
+}
+
+/* ---- footer ---- */
+
+footer{
+    padding:46px 0;
+    text-align:center;
+    color:var(--dim);
+    font-size:1.1rem;
+    letter-spacing:.18em;
+    border-top:1px solid var(--border);
+}
+
+footer .mmxxvi{
+    font-family:"Press Start 2P",monospace;
+    font-size:.7rem;
+    color:var(--dim);
+    display:block;
+    margin-bottom:14px;
+}
+
+@media (max-width:768px){
+    .hero-content{grid-template-columns:1fr;gap:48px;}
+    .nav-links{display:none;}
+    .tagline{margin-left:auto;margin-right:auto;}
+}
+
+</style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <nav>
+            <div class="logo">VORKAN</div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="index.html">Apps</a>
+                <a href="privacy.html">Privacy</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-copy">
+                <div class="scoreline"><span class="hi">HI</span> 30000</div>
+                <h1 class="logo-big">VORKAN</h1>
+                <p class="subtitle">VECTOR STORM</p>
+                <p class="tagline">Ride the rim of the web. Blast what climbs toward you. Survive the storm.</p>
+                <a class="download" href="#">Coming to the App Store</a>
+            </div>
+            <div class="phone">
+                <img src="vorkan0.png" alt="VORKAN title screen">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features" id="features">
+    <div class="container">
+        <h2 class="section-title">// INSERT COIN</h2>
+        <div class="features-grid">
+
+            <div class="feature">
+                <h3>Ride the Web</h3>
+                <p>Spin around the rim of a neon vector tube and fire down the lanes at everything crawling up.</p>
+            </div>
+
+            <div class="feature">
+                <h3>Vector Storm</h3>
+                <p>Glowing wireframe enemies, CRT phosphor glow, and pure arcade adrenaline on every wave.</p>
+            </div>
+
+            <div class="feature">
+                <h3>Use Either Hand</h3>
+                <p>Configure the spin dial and fire buttons for left or right handed play.</p>
+            </div>
+
+            <div class="feature">
+                <h3>Superzapper</h3>
+                <p>One screen-clearing blast for when the swarm gets too thick. Use it wisely.</p>
+            </div>
+
+            <div class="feature">
+                <h3>Chase the High Score</h3>
+                <p>Endless waves, climbing speed. How long can you hold the line?</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="showcase">
+    <div class="container">
+        <h2 class="section-title">// IN THE STORM</h2>
+        <div class="phone">
+            <img src="vorkan1.png" alt="VORKAN gameplay">
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2>How long can you<br/>survive the storm?</h2>
+        <p>One ship. Endless waves. Pure vector mayhem.</p>
+        <a class="download" href="#">Coming to the App Store</a>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <span class="mmxxvi">MMXXVI</span>
+        © 2026 Kramden Apps
+    </div>
+</footer>
+
+</body>
+</html>
