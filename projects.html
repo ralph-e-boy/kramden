@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — Ralph Seaman</title>
+<style>
+:root {
+  --bg: #111114;
+  --surface: #1A1A1E;
+  --border: #363640;
+  --text-1: #F2F0EC;
+  --text-2: #B8B4AE;
+  --text-3: #7A7672;
+  --accent: rgb(212, 168, 67);
+  --accent-dim: rgba(212, 168, 67, 0.15);
+  --accent-mid: rgba(212, 168, 67, 0.4);
+  --header-h: 48px;
+  --footer-h: 56px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  min-height: 100%;
+  background: var(--bg); color: var(--text-1);
+  font-family: 'SF Pro Display', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  height: var(--header-h); display: flex; align-items: center;
+  justify-content: space-between; padding: 0 24px;
+  border-bottom: 1px solid var(--border); position: relative; z-index: 10;
+}
+.logo {
+  font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-1);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+}
+.logo span { color: var(--accent); }
+.back-link {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; text-decoration: none;
+  color: var(--text-2); border: 1px solid var(--border);
+  padding: 8px 16px; border-radius: 2px; transition: all 0.3s ease;
+}
+.back-link:hover { color: var(--text-1); border-color: var(--text-2); background: var(--surface); }
+
+main {
+  min-height: calc(100vh - var(--header-h) - var(--footer-h));
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 24px; position: relative;
+}
+main::before {
+  content: ''; position: absolute; left: 24px; top: 20%;
+  width: 2px; height: 60%; background: var(--accent);
+  opacity: 0.6; border-radius: 1px;
+}
+
+.panel {
+  width: 100%; max-width: 760px;
+  display: grid; grid-template-columns: 1.1fr 0.9fr;
+  gap: 48px; align-items: center;
+}
+
+.category-label {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em;
+  color: var(--accent); margin-bottom: 14px;
+}
+.title {
+  font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 600;
+  letter-spacing: -0.02em; line-height: 1.05; margin-bottom: 22px;
+  background: linear-gradient(135deg, var(--accent), var(--text-1));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.desc {
+  font-size: 1.1rem; line-height: 1.7; color: var(--text-1);
+  max-width: 520px; margin-bottom: 26px;
+}
+.tech-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.pill {
+  padding: 6px 16px; font-size: 0.85rem;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  letter-spacing: 0.04em; color: var(--text-1);
+  border: 1px solid var(--accent); background: var(--accent-dim);
+}
+.detail-link {
+  display: inline-block; padding: 10px 22px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em;
+  text-decoration: none; color: var(--accent);
+  border: 1px solid var(--accent); background: var(--accent-dim);
+  transition: all 0.2s ease;
+}
+.detail-link:hover { background: var(--accent); color: var(--bg); }
+
+.visual { display: flex; align-items: center; justify-content: center; }
+.frame {
+  width: 100%; max-width: 320px; aspect-ratio: 4 / 5;
+  border: 1px dashed var(--border); position: relative;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface); overflow: hidden;
+  box-shadow: 0 0 40px -10px var(--accent-dim);
+}
+.frame::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+  );
+}
+.frame .stamp {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--text-3); transform: rotate(-8deg);
+  border: 2px solid var(--text-3); padding: 10px 18px; opacity: 0.55;
+}
+
+footer {
+  height: var(--footer-h); display: flex; align-items: center;
+  justify-content: space-between; padding: 0 24px;
+  border-top: 1px solid var(--border); background: var(--surface);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8rem; color: var(--text-3); letter-spacing: 0.05em;
+}
+
+@media (max-width: 760px) {
+  .panel { grid-template-columns: 1fr; gap: 32px; }
+  .visual { order: -1; }
+  .frame { max-width: 240px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Ralph Seaman <span>Projects</span></div>
+  <a class="back-link" href="index.html">&larr; Home</a>
+</header>
+
+<main>
+  <div class="panel">
+    <div class="info">
+      <div class="category-label">// Coming Soon</div>
+      <h1 class="title">Projects</h1>
+      <p class="desc">
+        A curated selection of open-source work &mdash; graphics, trading tools,
+        and assorted experiments &mdash; is on its way. Until then, the code lives on GitHub.
+      </p>
+      <div class="tech-pills">
+        <span class="pill">Swift</span>
+        <span class="pill">Metal</span>
+        <span class="pill">Go</span>
+        <span class="pill">C++</span>
+        <span class="pill">Python</span>
+        <span class="pill">WebGL</span>
+      </div>
+      <a class="detail-link" href="https://github.com/ralph-e-boy" target="_blank" rel="noopener">Browse GitHub &rarr;</a>
+    </div>
+
+    <div class="visual">
+      <div class="frame">
+        <div class="stamp">Coming Soon</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>© 2026 Ralph Seaman</span>
+  <span>Independent Software</span>
+</footer>
+
+</body>
+</html>
