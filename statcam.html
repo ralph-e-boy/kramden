@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statcam — Classic Halftone Screens for macOS</title>
+<link rel="icon" href="statcam/icon-128.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+    --ink:#0b0a09;
+    --ink-2:#141210;
+    --paper:#efe9dc;
+    --paper-2:rgba(239,233,220,.62);
+    --paper-3:rgba(239,233,220,.34);
+    --line:rgba(239,233,220,.16);
+    --line-2:rgba(239,233,220,.28);
+    --accent:#c85238;
+    --accent-2:#d8735a;
+    --ease:cubic-bezier(.22,1,.36,1);
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+    margin:0;
+    height:100%;
+    overflow:hidden;                 /* one screen, never scrolls */
+    background:var(--ink);
+}
+
+body{
+    font-family:"Space Mono",ui-monospace,Menlo,monospace;
+    font-size:19px;
+    line-height:1.65;
+    color:var(--paper);
+    -webkit-font-smoothing:antialiased;
+}
+
+button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+
+/* ---------- the plate ---------- */
+
+.plate{ position:fixed; inset:0; z-index:0; background:var(--ink); }
+
+.plate-img{
+    position:absolute;
+    inset:-40px;                     /* slack for the parallax drift */
+    background:#000 url("ht.png") center / cover no-repeat;
+    opacity:.16;
+    transition:transform 1.4s var(--ease);
+    will-change:transform;
+}
+
+.plate-scrim{
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(ellipse at 50% 45%, rgba(11,10,9,.92) 0%, rgba(11,10,9,.66) 42%, transparent 76%),
+        linear-gradient(105deg, rgba(200,82,56,.06), transparent 55%);
+}
+
+/* grain + vignette over everything */
+.grain{
+    position:fixed; inset:0; z-index:90; pointer-events:none;
+    background:
+        repeating-linear-gradient(0deg, rgba(0,0,0,.09) 0 1px, transparent 1px 4px),
+        radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,.5) 100%);
+    opacity:.4;
+}
+
+/* ---------- shell ---------- */
+
+.app{
+    position:relative;
+    z-index:10;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    padding:14px;
+}
+
+.window{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    border:1px solid var(--line-2);
+    background:rgba(11,10,9,.72);
+    backdrop-filter:blur(2px);
+    box-shadow:0 30px 90px -30px rgba(0,0,0,.95);
+}
+
+/* ---------- titlebar ---------- */
+
+.titlebar{
+    flex:0 0 auto;
+    height:78px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    padding:0 20px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(239,233,220,.09), rgba(239,233,220,.03));
+}
+
+.appicon{
+    flex:0 0 auto;
+    width:48px; height:48px;
+    display:block;
+    image-rendering:-webkit-optimize-contrast;   /* keep the dots crisp */
+}
+
+.mark{
+    font-family:"Abril Fatface",Didot,Georgia,serif;
+    font-weight:400;
+    font-size:29px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
+
+/* sliding-underline tabs */
+.tabs{
+    position:relative;
+    display:flex;
+    gap:4px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.tab{
+    position:relative;
+    padding:10px 19px;
+    font-size:16.5px;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:var(--paper-3);
+    transition:color .3s var(--ease);
+    white-space:nowrap;
+}
+
+.tab:hover{ color:var(--paper-2); }
+.tab[aria-selected="true"]{ color:var(--paper); }
+
+.tabs .slide{
+    position:absolute;
+    left:0; bottom:0;
+    height:2px;
+    background:var(--accent);
+    transform:translateX(var(--x,0)) scaleX(var(--s,0));
+    transform-origin:left;
+    width:1px;
+    transition:transform .45s var(--ease);
+    pointer-events:none;
+}
+
+.get{
+    flex:0 0 auto;
+    padding:12px 20px;
+    font-size:15px; font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase;
+    text-decoration:none;
+    color:var(--ink);
+    background:var(--paper);
+    box-shadow:3px 3px 0 var(--accent);
+    transition:transform .18s var(--ease), box-shadow .18s var(--ease);
+    white-space:nowrap;
+}
+.get:hover{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--accent); }
+
+/* ---------- panels ---------- */
+
+.body{ position:relative; flex:1 1 auto; min-height:0; }
+
+.panel{
+    position:absolute;
+    inset:0;
+    padding:16px;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(10px);
+    transition:opacity .38s var(--ease), transform .38s var(--ease), visibility .38s;
+}
+
+.panel.on{ opacity:1; visibility:visible; transform:none; }
+
+/* ---------- panel: screens ---------- */
+
+#p-screens{
+    display:grid;
+    grid-template-columns:295px minmax(0,1fr);
+    gap:16px;
+    min-height:0;
+}
+
+.picker{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+}
+
+.picker h2{
+    margin:0 0 13px;
+    font-size:14px; font-weight:400;
+    letter-spacing:.2em; text-transform:uppercase;
+    color:var(--accent-2);
+}
+
+.picker .items{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-height:0;
+    overflow:auto;
+    scrollbar-width:none;
+}
+.picker .items::-webkit-scrollbar{ display:none; }
+
+.item{
+    position:relative;
+    text-align:left;
+    padding:11px 14px 11px 28px;
+    font-size:17.5px;
+    letter-spacing:.01em;
+    color:var(--paper-2);
+    border:1px solid transparent;
+    transition:color .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease);
+}
+
+/* the register mark that walks down the list */
+.item::before{
+    content:"";
+    position:absolute;
+    left:11px; top:50%;
+    width:6px; height:6px;
+    margin-top:-3px;
+    border-radius:50%;
+    background:var(--paper-3);
+    transition:background .25s var(--ease), transform .25s var(--ease);
+}
+
+.item:hover{ color:var(--paper); background:rgba(239,233,220,.05); }
+.item[aria-current="true"]{
+    color:var(--paper);
+    background:rgba(200,82,56,.14);
+    border-color:rgba(200,82,56,.5);
+}
+.item[aria-current="true"]::before{ background:var(--accent); transform:scale(1.5); }
+
+.stagecol{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    min-width:0;
+}
+
+.stage{
+    position:relative;
+    flex:1 1 auto;
+    min-height:0;
+    background:#000;
+    border:1px solid var(--line);
+    overflow:hidden;
+}
+
+.stage img{
+    position:absolute;
+    inset:0;
+    width:100%; height:100%;
+    object-fit:contain;
+    opacity:0;
+    transform:scale(1.015);
+    transition:opacity .45s var(--ease), transform .6s var(--ease);
+}
+
+.stage img.on{ opacity:1; transform:none; }
+
+.arrow{
+    position:absolute; top:50%;
+    width:42px; height:42px;
+    margin-top:-21px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    color:var(--paper);
+    background:rgba(11,10,9,.6);
+    border:1px solid var(--line-2);
+    opacity:0;
+    transition:opacity .3s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+    z-index:3;
+}
+.stage:hover .arrow, .arrow:focus-visible{ opacity:1; }
+.arrow:hover{ background:var(--accent); border-color:var(--accent); }
+.arrow.prev{ left:10px; }
+.arrow.next{ right:10px; }
+
+/* caption / transport */
+.transport{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:9px 2px 0;
+}
+
+.frame-no{ font-size:15px; letter-spacing:.1em; color:var(--accent-2); }
+.frame-name{ font-size:16px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.frame-note{ font-size:15px; color:var(--paper-3); }
+
+.ticks{ display:flex; gap:5px; margin-left:auto; }
+.tick{
+    width:26px; height:4px;
+    background:rgba(239,233,220,.2);
+    transition:background .25s var(--ease), transform .25s var(--ease);
+}
+.tick:hover{ background:var(--paper-3); }
+.tick[aria-current="true"]{ background:var(--accent); transform:scaleY(2); }
+
+/* ---------- panel: press ---------- */
+
+#p-press{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:repeat(2,minmax(0,1fr));
+    gap:14px;
+}
+
+.card{
+    border:1px solid var(--line);
+    background:rgba(239,233,220,.04);
+    padding:16px 18px;
+    min-height:0;
+    overflow:auto;
+    scrollbar-width:none;
+    transition:background .3s var(--ease), border-color .3s var(--ease);
+}
+.card::-webkit-scrollbar{ display:none; }
+.card:hover{ background:rgba(239,233,220,.07); border-color:var(--line-2); }
+
+.card h3{
+    margin:0 0 12px;
+    font-size:15px; font-weight:700;
+    letter-spacing:.13em; text-transform:uppercase;
+    color:var(--accent-2);
+}
+
+.card p{ margin:0; font-size:17.5px; line-height:1.75; color:var(--paper-2); }
+
+/* ---------- panel: about ---------- */
+
+#p-about{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:6px;
+}
+
+#p-about .hero-icon{
+    width:clamp(84px,13vh,132px);
+    height:auto;
+    margin-bottom:14px;
+    filter:drop-shadow(0 14px 34px rgba(200,82,56,.35));
+}
+
+#p-about .big{
+    font-family:"Abril Fatface",Didot,Georgia,serif;
+    font-weight:400;
+    font-size:clamp(30px,5.5vw,58px);
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    line-height:1;
+    text-shadow:3px 3px 0 rgba(200,82,56,.9);
+}
+
+#p-about .line{ font-size:19px; line-height:1.8; color:var(--paper-2); max-width:580px; }
+#p-about .meta{ font-size:15px; letter-spacing:.13em; text-transform:uppercase; color:var(--paper-3); }
+#p-about .get{ margin-top:12px; }
+
+#p-about .credit{
+    margin-top:16px;
+    font-size:14.5px;
+    color:var(--paper-3);
+    max-width:600px;
+    line-height:1.8;
+}
+
+#p-about a.plain{ color:var(--paper-2); }
+
+/* ---------- statusbar ---------- */
+
+.statusbar{
+    flex:0 0 auto;
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    border-top:1px solid var(--line);
+    font-size:14.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--paper-3);
+    background:rgba(239,233,220,.03);
+}
+
+.statusbar kbd{
+    font:inherit;
+    border:1px solid var(--line-2);
+    padding:1px 5px;
+    margin:0 1px;
+}
+
+/* the readout is a sentence, not a label — let it set normally */
+#status{
+    text-transform:none;
+    letter-spacing:.01em;
+    color:var(--paper-2);
+    margin-right:24px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.statusbar .hint{ flex:0 0 auto; }
+
+.statusbar a{ color:var(--paper-3); text-decoration:none; }
+.statusbar a:hover{ color:var(--paper); }
+
+/* ---------- narrow / short ---------- */
+
+@media (max-width:860px){
+    .tabs{ margin-right:0; }
+    .mark{ font-size:15px; letter-spacing:.1em; }
+    .get{ display:none; }
+    #p-screens{ grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
+    .picker .items{ flex-direction:row; overflow-x:auto; gap:5px; }
+    .item{ white-space:nowrap; padding:6px 11px; }
+    .item::before{ display:none; }
+    #p-press{ grid-template-columns:minmax(0,1fr); grid-template-rows:none; overflow:auto; }
+    .card{ overflow:visible; }
+    .frame-note{ display:none; }
+}
+
+@media (max-width:560px){
+    .titlebar{ gap:10px; padding:0 10px; }
+    .appicon{ width:30px; height:30px; }
+    .tabs .tab{ padding:7px 9px; letter-spacing:.12em; }
+    .ticks{ display:none; }
+    .statusbar .hint{ display:none; }
+}
+
+@media (prefers-reduced-motion:reduce){
+    *{ animation:none !important; transition-duration:.01ms !important; }
+    .plate-img{ transform:none !important; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="plate">
+    <div class="plate-img" id="plateImg"></div>
+    <div class="plate-scrim"></div>
+</div>
+
+<div class="app">
+<div class="window">
+
+    <div class="titlebar">
+        <img class="appicon" src="statcam/icon-128.png" alt="" width="48" height="48">
+        <div class="mark">Statcam</div>
+
+        <div class="tabs" role="tablist" id="tabs">
+            <button class="tab" role="tab" aria-selected="true"  aria-controls="p-screens" id="t-screens">Screens</button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="p-press"   id="t-press">Controls</button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="p-about"   id="t-about">About</button>
+            <span class="slide" id="slide"></span>
+        </div>
+
+        <a class="get" href="https://apps.apple.com/us/app/id6805277622">Mac App Store</a>
+    </div>
+
+    <div class="body">
+
+        <!-- ---------- screens ---------- -->
+        <section class="panel on" id="p-screens" role="tabpanel" aria-labelledby="t-screens">
+
+            <div class="picker">
+                <h2>Technique</h2>
+                <div class="items" id="items"></div>
+            </div>
+
+            <div class="stagecol">
+                <div class="stage" id="stage">
+                    <button class="arrow prev" id="prev" aria-label="Previous frame">&#9664;</button>
+                    <button class="arrow next" id="next" aria-label="Next frame">&#9654;</button>
+                </div>
+
+                <div class="transport">
+                    <span class="frame-no"   id="frameNo">01 / 10</span>
+                    <span class="frame-name" id="frameName">AM dot</span>
+                    <span class="frame-note" id="frameNote"></span>
+                    <div class="ticks" id="ticks"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ---------- press ---------- -->
+        <section class="panel" id="p-press" role="tabpanel" aria-labelledby="t-press">
+
+            <div class="card">
+                <h3>Printing</h3>
+                <p>Adjustable screen ruling, output resolution and screen angle. Letterpress halo, per-cell jitter, midtone darkening for dot gain, a tone curve, and a printable-dot range that clamps the highlights and shadows.</p>
+            </div>
+
+            <div class="card">
+                <h3>Paper and ink</h3>
+                <p>Any ink and paper colour, including duotones. Stocks: newsprint, kraft, linen, watercolour, smooth coated, rough uncoated, onion skin, foxed and print-through.</p>
+            </div>
+
+            <div class="card">
+                <h3>Before the screen</h3>
+                <p>Gamma, brightness, contrast, levels, blur, sharpen, saturation, posterize, vignette, threshold and invert, applied to the source before it is screened.</p>
+            </div>
+
+            <div class="card">
+                <h3>Import and export</h3>
+                <p>Imports your own images, exports PNG at full working resolution. Built-in sources: a still life, a shaded sphere, linear and radial gradients, a step wedge and a colour test chart.</p>
+            </div>
+
+        </section>
+
+        <!-- ---------- about ---------- -->
+        <section class="panel" id="p-about" role="tabpanel" aria-labelledby="t-about">
+            <img class="hero-icon" src="statcam/icon.png" alt="Statcam app icon" width="132" height="132">
+            <div class="big">Statcam</div>
+            <p class="line">Render photos using classic halftone screens. Renders on the GPU, redraws while you drag.</p>
+            <div class="meta">For macOS &middot; Coming soon</div>
+            <a class="get" href="https://apps.apple.com/us/app/id6805277622">Mac App Store</a>
+            <p class="credit">
+                The historical screens follow the Getty Conservation Institute&rsquo;s
+                <em>Atlas of Analytical Signatures of Photographic Processes</em>.
+                <br>&copy; 2026 Kramden Apps &middot;
+                <a class="plain" href="index.html">Apps</a> &middot;
+                <a class="plain" href="privacy.html">Privacy</a>
+            </p>
+        </section>
+
+    </div>
+
+    <div class="statusbar">
+        <span id="status">AM dot &mdash; classical Ives/Levy screen</span>
+        <span class="hint"><kbd>&larr;</kbd><kbd>&rarr;</kbd> frame &nbsp; <kbd>tab</kbd> section</span>
+    </div>
+
+</div>
+</div>
+
+<div class="grain"></div>
+
+<script>
+(function () {
+"use strict";
+
+/* ---------- data ---------- */
+
+// nine techniques; chunky dots is an AM dot at a coarse ruling, not a tenth screen
+const FRAMES = [
+    { file:"01-am-dot",          name:"AM dot",           note:"Classical Ives/Levy screen",        tech:0 },
+    { file:"02-cmyk",            name:"CMYK",             note:"Four screens, offset angles",       tech:1 },
+    { file:"03-line",            name:"Line",             note:"Thickness carries the tone",        tech:2 },
+    { file:"04-wavy",            name:"Wavy line",        note:"Sinusoidal modulation",             tech:3 },
+    { file:"05-stochastic",      name:"Stochastic / FM",  note:"Random placement, tonal density",   tech:4 },
+    { file:"06-metzograph",      name:"Metzograph",       note:"Cracked-resist texture",            tech:5 },
+    { file:"07-erwin-grain",     name:"Erwin grain",      note:"Reticulated gelatin",               tech:6 },
+    { file:"08-bayer",           name:"Bayer",            note:"Ordered dither matrix",             tech:7 },
+    { file:"09-error-diffusion", name:"Error diffusion",  note:"Floyd–Steinberg, Atkinson, Stucki", tech:8 },
+    { file:"10-chunky-dots",     name:"AM dot",           note:"Coarse ruling, poster scale",       tech:0 }
+];
+
+const TECHS = [
+    { name:"AM dot",          desc:"Classical Ives/Levy dot screen. Round, square, diamond, elliptical or line dots, at any ruling and angle." },
+    { name:"CMYK",            desc:"Four screens at offset angles, composited as subtractive ink." },
+    { name:"Line",            desc:"Ruled lines whose thickness carries the tone." },
+    { name:"Wavy line",       desc:"The same screen under sinusoidal modulation." },
+    { name:"Stochastic / FM", desc:"Fixed-size dots placed at random, density following the tone." },
+    { name:"Metzograph",      desc:"The cracked-resist texture of the old grained screens." },
+    { name:"Erwin grain",     desc:"Reticulated gelatin — long, sinuous filaments." },
+    { name:"Bayer",           desc:"Ordered dither against a threshold matrix." },
+    { name:"Error diffusion", desc:"Floyd–Steinberg, Atkinson, Jarvis-Judice-Ninke, Stucki, Sierra-3 and Burkes, with optional serpentine traversal." }
+];
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+
+/* ---------- tabs ---------- */
+
+const tabs   = Array.from(document.querySelectorAll(".tab"));
+const slide  = $("slide");
+let activeTab = 0;
+
+const moveSlide = () => {
+    const t = tabs[activeTab];
+    slide.style.setProperty("--x", t.offsetLeft + "px");
+    slide.style.setProperty("--s", t.offsetWidth);
+};
+
+const selectTab = i => {
+    activeTab = (i + tabs.length) % tabs.length;
+    tabs.forEach((t, n) => {
+        const on = n === activeTab;
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        $(t.getAttribute("aria-controls")).classList.toggle("on", on);
+    });
+    moveSlide();
+};
+
+tabs.forEach((t, i) => t.addEventListener("click", () => selectTab(i)));
+window.addEventListener("resize", moveSlide);
+
+/* ---------- technique picker ---------- */
+
+const items = TECHS.map((t, i) => {
+    const b = document.createElement("button");
+    b.className = "item";
+    b.type = "button";
+    b.textContent = t.name;
+    b.addEventListener("click", () => {
+        // jump to this technique's first frame
+        show(FRAMES.findIndex(f => f.tech === i));
+    });
+    $("items").appendChild(b);
+    return b;
+});
+
+/* ---------- frames ---------- */
+
+const stage = $("stage");
+
+const imgs = FRAMES.map((f, i) => {
+    const el = document.createElement("img");
+    el.src = "statcam/" + f.file + ".webp";
+    el.alt = "Statcam — " + f.name;
+    el.loading  = i === 0 ? "eager" : "lazy";
+    el.decoding = "async";
+    stage.insertBefore(el, stage.firstChild);
+    return el;
+});
+
+const ticks = FRAMES.map((f, i) => {
+    const b = document.createElement("button");
+    b.className = "tick";
+    b.type = "button";
+    b.setAttribute("aria-label", f.name);
+    b.addEventListener("click", () => show(i));
+    $("ticks").appendChild(b);
+    return b;
+});
+
+let cur = -1;
+
+function show(i) {
+    const n = (i + FRAMES.length) % FRAMES.length;
+    if (n === cur) return;
+
+    if (cur >= 0) {
+        imgs[cur].classList.remove("on");
+        ticks[cur].removeAttribute("aria-current");
+        items[FRAMES[cur].tech].removeAttribute("aria-current");
+    }
+
+    cur = n;
+    const f = FRAMES[n];
+
+    imgs[n].classList.add("on");
+    ticks[n].setAttribute("aria-current", "true");
+    items[f.tech].setAttribute("aria-current", "true");
+
+    $("frameNo").textContent   = pad(n + 1) + " / " + pad(FRAMES.length);
+    $("frameName").textContent = f.name;
+    $("frameNote").textContent = f.note;
+    $("status").textContent    = TECHS[f.tech].name + " — " + TECHS[f.tech].desc;
+}
+
+const step = d => show(cur + d);
+
+$("prev").addEventListener("click", () => step(-1));
+$("next").addEventListener("click", () => step(1));
+
+/* ---------- keyboard ---------- */
+
+document.addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    if (e.key === "Tab") { e.preventDefault(); selectTab(activeTab + (e.shiftKey ? -1 : 1)); return; }
+
+    if (activeTab !== 0) return;
+    if (e.key === "ArrowLeft")  { e.preventDefault(); step(-1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+});
+
+/* ---------- swipe ---------- */
+
+let sx = null;
+stage.addEventListener("touchstart", e => { sx = e.changedTouches[0].clientX; }, { passive:true });
+stage.addEventListener("touchend", e => {
+    if (sx === null) return;
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+    sx = null;
+}, { passive:true });
+
+/* ---------- the plate drifts under the pointer ---------- */
+
+const plate = $("plateImg");
+let raf = 0;
+
+window.addEventListener("pointermove", e => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+        raf = 0;
+        const x = (e.clientX / window.innerWidth  - .5) * -18;
+        const y = (e.clientY / window.innerHeight - .5) * -18;
+        plate.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0)";
+    });
+}, { passive:true });
+
+/* ---------- go ---------- */
+
+show(0);
+moveSlide();
+document.fonts && document.fonts.ready.then(moveSlide);
+
+})();
+</script>
+
+</body>
+</html>
